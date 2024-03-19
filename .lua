@@ -3498,7 +3498,7 @@ function library:CreateWindow(name, size, hidebutton)
             return configSystem
         end
 
-  function tab:CreatePlayerlist(name)
+local function CreatePlayerlist(name)
     local list = {}
     list.name = name or ""
 
@@ -3537,7 +3537,7 @@ function library:CreateWindow(name, size, hidebutton)
     list.Label.BorderSizePixel = 0
     list.Label.ZIndex = 4
     list.Label.Text = list.name
-    list.Label.TextColor3 = Color3.new(1, 1, 252 / 255) -- Corrected color value
+    list.Label.TextColor3 = Color3.new(1, 1, 1)
     list.Label.TextStrokeTransparency = 1
     list.Label.Font = window.theme.font
     list.Label.TextSize = 13
@@ -3582,34 +3582,39 @@ function library:CreateWindow(name, size, hidebutton)
         player.Main.ZIndex = 3
         player.Main.Size = UDim2.fromOffset(list.Items.AbsoluteSize.X - 12, 20)
         player.Main.BackgroundColor3 = window.theme.sectorcolor
-        player.Main.Position = UDim2.new(0, 0, 0, 0)
+        player.Main.Position = UDim2.new(0, 0, 0, (#list.items * 20))
 
-        table.insert(list.items, Player)
+        table.insert(list.items, player)
         list.Items.CanvasSize = UDim2.fromOffset(list.Items.AbsoluteSize.X, (#list.items * 20))
         list.Items.Size = UDim2.fromOffset(list.Items.AbsoluteSize.X, math.clamp(list.Items.CanvasSize.Y.Offset, 0, 205))
         return player
     end
 
     function list:RemovePlayer(Player)
-        local p = list.Items:FindFirstChild(Player)
+        local p = list.Items:FindFirstChild(Player.Name)
         if p then
-            for i, v in pairs(list.items) do
-                if v == Player then
+            for i, v in ipairs(list.items) do
+                if v.Main.Name == Player.Name then
                     table.remove(list.items, i)
+                    break
                 end
             end
 
-            p:Remove()
-            list.Items.CanvasSize = UDim2.fromOffset(list.Items.AbsoluteSize.X, (#list.items * 90))
+            p:Destroy()
+            list.Items.CanvasSize = UDim2.fromOffset(list.Items.AbsoluteSize.X, (#list.items * 20))
         end
     end
 
-    for i, v in pairs(game:GetService("Players"):GetPlayers()) do
-        list:AddPlayer(v)
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        list:AddPlayer(player)
     end
 
-    game:GetService("Players").PlayerAdded:Connect(function(v)
-        list:AddPlayer(v)
+    game:GetService("Players").PlayerAdded:Connect(function(player)
+        list:AddPlayer(player)
+    end)
+
+    game:GetService("Players").PlayerRemoving:Connect(function(player)
+        list:RemovePlayer(player)
     end)
 
     return list
