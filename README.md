@@ -1,2 +1,0 @@
-# SquidHook
-awddawdadawdawda2w3awdsawdasawdasdwdsawdassdawdaswadaswd
